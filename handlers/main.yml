@@ -1,0 +1,17 @@
+---
+# handlers file for authentication
+- name: update trust
+  command: "/usr/sbin/update-ca-trust extract"
+
+- name: restart sssd
+  listen: "restart domain services"
+  service: name=sssd state=restarted
+
+- name: restart sshd
+  service: name=sshd state=restarted
+  when: ansible_os_family != "Debian"
+
+- name: restart sshd (debian)
+  service: name=ssh state=restarted
+  listen: "restart sshd"
+  when: ansible_os_family == "Debian"

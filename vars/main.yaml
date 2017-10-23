@@ -1,0 +1,7 @@
+---
+packages_to_install:
+  - pexpect
+
+enabled_services:
+  - sssd
+  - oddjobd
