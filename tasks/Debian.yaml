@@ -9,4 +9,3 @@
     regexp: "^session.*pam_mkhomedir.so"
     line: session optional pam_mkhomedir.so
     state: present
-  when: ansible_os_family == "Debian"
