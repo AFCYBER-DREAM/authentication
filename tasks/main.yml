@@ -36,6 +36,15 @@
       Password for.*: "{{ bind_password }}"
   when: realm_bound|failed
 
+- name: Configure sssd
+  template:
+    src: sssd.j2
+    dest: /etc/sssd/sssd.conf
+    group: root
+    owner: root
+    mode: 0600
+  notify: restart sssd
+
 - name: Enable required services
   service:
     name: "{{ item }}"
