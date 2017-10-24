@@ -1,0 +1,138 @@
+---
+# tasks file for authentication
+- name: Install required packages
+  yum:
+    name: "{{ item }}"
+  with_items: "{{ packages_to_install }}"
+
+- include_vars: certificate.yaml
+
+- name: install CA certificate
+  copy:
+    content: "{{ ca_cert }}"
+    dest: "{{ ca_cert_location }}/dev-net-root.crt"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: update trust
+
+- name: configure kerberos realm
+  tags: configure
+  ini_file:
+    path: /etc/krb5.conf
+    section: libdefaults
+    option: default_realm
+    value: "{{ realm }}"
+
+- name: configure samba
+  tags: configure
+  ini_file:
+    create: yes
+    path: /etc/samba/smb.conf
+    state: present
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { section: global, option: workgroup, value: "{{ workgroup }}" }
+    - { section: global, option: realm, value: "{{ realm }}" }
+    - { section: global, option: "client signing", value: "yes" }
+    - { section: global, option: "client use spnego", value: "yes" }
+    - { section: global, option: security, value: "ads" }
+    - { section: global, option: "kerberos method", value: "secrets and keytab" }
+
+- name: Configure sssd
+  template:
+    src: sssd.j2
+    dest: /etc/sssd/sssd.conf
+    group: root
+    owner: root
+    mode: 0600
+  notify: restart sssd
+
+- name: Include RedHat based auth settings
+  include: RedHat.yaml
+  when: ansible_os_family == "RedHat"
+
+- name: Include Debian based auth settings
+  include: Debian.yaml
+  when: ansible_os_family == "Debian"
+
+- name: join the domain
+  tags: configure
+  command: "net ads join -U {{ bind_user }}%{{ bind_password }}"
+  args:
+    creates: /etc/krb5.keytab
+  notify: restart domain services
+
+- name: Configure sssd (again)
+  template:
+    src: sssd.j2
+    dest: /etc/sssd/sssd.conf
+    group: root
+    owner: root
+    mode: 0600
+  notify: restart sssd
+
+- name: Enable required services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items: "{{ enabled_services }}"
+
+
+
+
+
+
+
+
+
+
+
+# - name: Check domain membership status
+#   shell: /bin/bash -c "realm list | grep sssd"
+#   register: realm_bound
+#   changed_when: False
+#   ignore_errors: True
+#
+# - name: Join the domain
+#   expect:
+#     command: "/bin/bash -c '/usr/sbin/realm join -U {{ bind_user }} {{ realm }}'"
+#     responses:
+#       Password for.*: "{{ bind_password }}"
+#   when: realm_bound|failed
+
+
+
+
+
+
+
+
+# For now we assume static assignment of DNS addresses.
+# --no-dns-updates only works on RedHat.
+# - name: join the domain
+#   tags: configure
+#   command: "net ads join -U {{ register }}%{{ register_pass }}"
+#   args:
+#     creates: /etc/krb5.keytab
+#   notify: restart domain services
+
+
+# - name: configure SSH for Kerberos
+#   tags: configure
+#   lineinfile:
+#     path: /etc/ssh/sshd_config
+#     regexp: '^GSSAPIAuthentication no'
+#     state: absent
+#   notify: restart sshd
+#
+# - tags: configure
+#   lineinfile:
+#     path: /etc/ssh/sshd_config
+#     regexp: '^GSSAPIAuthentication yes'
+#     line: "GSSAPIAuthentication yes"
+#     state: present
+#   notify: restart sshd

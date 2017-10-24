@@ -1,0 +1,12 @@
+---
+# PAM is setup differently across Debian and RedHat.
+# Debian is simple; pam_sss is automatically enabled, and we only have to modify
+# common-session for mkhomdir.
+- name: configure PAM
+  tags: configure
+  lineinfile:
+    path: /etc/pam.d/common-session
+    regexp: "^session.*pam_mkhomedir.so"
+    line: session optional pam_mkhomedir.so
+    state: present
+  when: ansible_os_family == "Debian"

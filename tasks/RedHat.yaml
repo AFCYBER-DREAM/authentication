@@ -1,0 +1,17 @@
+---
+# RedHat uses authconfig, so to make this command idempotent we have to jump through hoops.
+# First, test the saved authconfig with awk, save the result to a variable, and force changed
+# to false.  This is a trick picked up from stackoverflow.
+- tags: configure
+  command: awk /^USEMKHOMEDIR=.*$/ /etc/sysconfig/authconfig
+  register: mkhomedir
+  changed_when: False
+  when: ansible_os_family == "RedHat"
+
+# Second, execute authconfig only if the configuration isn't what we want by testing the
+# awk result saved in the previous task.  We also test for os_family here because Debian
+# knows not of authconfig.
+- tags: configure
+  command: "authconfig --enablemkhomedir --enablesssd --enablesssdauth --update"
+  when: ansible_os_family == "RedHat" and mkhomedir.stdout | match("USEMKHOMEDIR=no")
+  notify: restart domain services
