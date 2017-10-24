@@ -1,7 +1,10 @@
 ---
 packages_to_install:
-  - pexpect
+  - python2-pip
 
 enabled_services:
   - sssd
   - oddjobd
+
+pip_packages:
+  - pexpect
