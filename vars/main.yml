@@ -1,6 +1,16 @@
 ---
 packages_to_install:
   - python2-pip
+  - sssd
+  - realmd
+  - oddjob
+  - oddjob-mkhomedir
+  - adcli
+  - samba-common
+  - samba-common-tools
+  - krb5-workstation
+  - openldap-clients
+  - policycoreutils-python
 
 enabled_services:
   - sssd
