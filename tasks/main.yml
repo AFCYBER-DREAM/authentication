@@ -12,7 +12,7 @@
     extra_args: "--trusted-host pypi.python.org"
   with_items: "{{ pip_packages }}"
 
-- include_vars: certificate.yaml
+- include_vars: certificate.yml
 
 - name: install CA certificate
   copy:
