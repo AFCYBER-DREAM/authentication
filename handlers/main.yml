@@ -1,7 +1,7 @@
 ---
 # handlers file for authentication
 - name: update trust
-  command: "/usr/sbin/update-ca-trust extract"
+  command: "update-ca-trust extract"
 
 - name: restart sssd
   listen: "restart domain services"

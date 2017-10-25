@@ -12,8 +12,6 @@
     extra_args: "--trusted-host pypi.python.org"
   with_items: "{{ pip_packages }}"
 
-- include_vars: certificate.yml
-
 - name: install CA certificate
   copy:
     content: "{{ ca_cert }}"
@@ -52,60 +50,3 @@
     state: started
   with_items: "{{ enabled_services }}"
 
-# - name: configure kerberos realm
-#   tags: configure
-#   ini_file:
-#     path: /etc/krb5.conf
-#     section: libdefaults
-#     option: default_realm
-#     value: "{{ realm }}"
-#
-# - name: configure samba
-#   tags: configure
-#   ini_file:
-#     create: yes
-#     path: /etc/samba/smb.conf
-#     state: present
-#     section: "{{ item.section }}"
-#     option: "{{ item.option }}"
-#     value: "{{ item.value }}"
-#   with_items:
-#     - { section: global, option: workgroup, value: "{{ workgroup }}" }
-#     - { section: global, option: realm, value: "{{ realm }}" }
-#     - { section: global, option: "client signing", value: "yes" }
-#     - { section: global, option: "client use spnego", value: "yes" }
-#     - { section: global, option: security, value: "ads" }
-#     - { section: global, option: "kerberos method", value: "secrets and keytab" }
-#
-# - name: Configure sssd
-#   template:
-#     src: sssd.j2
-#     dest: /etc/sssd/sssd.conf
-#     group: root
-#     owner: root
-#     mode: 0600
-#   notify: restart sssd
-#
-# - name: Include RedHat based auth settings
-#   include: RedHat.yaml
-#   when: ansible_os_family == "RedHat"
-#
-# - name: Include Debian based auth settings
-#   include: Debian.yaml
-#   when: ansible_os_family == "Debian"
-#
-# - name: join the domain
-#   tags: configure
-#   command: "net ads join -U {{ bind_user }}%{{ bind_password }}"
-#   args:
-#     creates: /etc/krb5.keytab
-#   notify: restart domain services
-#
-# - name: Configure sssd (again)
-#   template:
-#     src: sssd.j2
-#     dest: /etc/sssd/sssd.conf
-#     group: root
-#     owner: root
-#     mode: 0600
-#   notify: restart sssd
