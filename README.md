@@ -1,38 +1,62 @@
-Role Name
-=========
+Authentication
+==============
 
-A brief description of the role goes here.
+The purpose of this role is to set up authentication to the Active Directory Domain.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Ensure that an up to date version of both this role.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+The default variables are stored in **defaults/main.yml** and are:
+
+* packages_to_install:
+* enabled_services:
+* enabled_booleans:
+
+Variables that should be set in either host or group vars are:
+
+* ca_cert_location:
+* bind_password
+* bind_user
+
+It is a good idea to use `ansible-vault encrypt_string` to encrypt the bind_user and bind_password variables.
+
+The following variable is found in ansible-playbooks/vault/certs/$realm.yml and it should be encrypted.
+
+* ca_cert:
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+The pexpect package must be installed by pip.
 
 Example Playbook
 ----------------
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+  - include: base.yml
+
+  - hosts: all
+    become: True
+    become_method: sudo
+    gather_facts: False
+    vars_files:
+      - vault/certs/{{ realm }}.yml
+    roles:
+      - authentication
+      - authorization
 
 License
 -------
 
-BSD
+MIT
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+The Development Range Engineering, Architecture, and Modernization (DREAM) Team.
