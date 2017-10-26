@@ -39,17 +39,19 @@ Example Playbook
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-  - include: base.yml
+    - include: base.yml
 
-  - hosts: all
-    become: True
-    become_method: sudo
-    gather_facts: False
-    vars_files:
-      - vault/certs/{{ realm }}.yml
-    roles:
-      - authentication
-      - authorization
+    - hosts: all
+      become: True
+      become_method: sudo
+      gather_facts: False
+
+      vars_files:
+        - vault/certs/{{ realm }}.yml
+
+      roles:
+        - authentication
+        - authorization
 
 License
 -------
