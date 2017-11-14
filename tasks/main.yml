@@ -32,7 +32,7 @@
     command: "/bin/bash -c '/usr/sbin/realm join -U {{ bind_user }} {{ realm }}'"
     responses:
       Password for.*: "{{ bind_password }}"
-  when: realm_bound|failed
+  when: realm_bound.rc != '0'
 
 - name: Configure sssd
   template:
